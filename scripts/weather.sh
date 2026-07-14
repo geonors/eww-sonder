@@ -2,8 +2,8 @@
 # Fetches weather from Open-Meteo (free, no API key) as compact JSON for eww.
 #
 # >>> SET YOUR COORDINATES HERE <<<  (find yours at https://www.latlong.net/)
-LAT="51.5074"    # example: London
-LON="-0.1278"
+LAT="50.50" # Insert own location
+LON="50.50"
 
 url="https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}"
 url+="&current=temperature_2m,relative_humidity_2m,weather_code"
@@ -13,18 +13,18 @@ url+="&timezone=auto&forecast_days=5"
 #   &temperature_unit=fahrenheit
 
 curl -sf --max-time 10 "$url" | jq -c '
-  # WMO weather code -> Nerd Font icon
+  # WMO weather code -> Nerd Font icon (as \uXXXX so the glyphs survive as ASCII)
   def icon:
-    if   . == 0            then ""      # clear
-    elif . <= 2            then ""      # partly cloudy
-    elif . == 3            then ""      # overcast
-    elif . <= 48           then ""      # fog
-    elif . <= 57           then ""      # drizzle
-    elif . <= 67           then ""      # rain
-    elif . <= 77           then ""      # snow
-    elif . <= 82           then ""      # rain showers
-    elif . <= 86           then ""      # snow showers
-    else                        ""      # thunderstorm
+    if   . == 0            then "\ue30d"      # clear
+    elif . <= 2            then "\ue302"      # partly cloudy
+    elif . == 3            then "\ue312"      # overcast
+    elif . <= 48           then "\ue313"      # fog
+    elif . <= 57           then "\ue31b"      # drizzle
+    elif . <= 67           then "\ue318"      # rain
+    elif . <= 77           then "\ue31a"      # snow
+    elif . <= 82           then "\ue319"      # rain showers
+    elif . <= 86           then "\ue35e"      # snow showers
+    else                        "\ue31d"      # thunderstorm
     end;
 
   {
