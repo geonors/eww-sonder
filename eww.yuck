@@ -1,0 +1,142 @@
+;; ============================================================
+;;  Sonder-inspired desktop setup for eww (Wayland)
+;;  Five background-layer windows: clock, weather, calendar,
+;;  system stats, and a live ISS tracker.
+;; ============================================================
+
+;; ---------- Data sources ----------
+
+(defpoll hours   :interval "5s"  `date +%H`)
+(defpoll minutes :interval "5s"  `date +%M`)
+(defpoll datestr :interval "60s" `date "+%A  |  %B %d %Y" | tr '[:upper:]' '[:lower:]'`)
+
+(defpoll weather :interval "15m"
+  :initial `{"temp":"--","hum":"--","icon":"","days":[]}`
+  `scripts/weather.sh`)
+
+(defpoll cal :interval "30m"
+  :initial `{"month":"","weeks":[]}`
+  `scripts/calendar.sh`)
+
+(defpoll gpu :interval "3s" :initial "0" `scripts/gpu.sh`)
+(defpoll net :interval "3s" :initial `{"down":0,"up":0}` `scripts/net.sh`)
+
+(defpoll iss :interval "30s"
+  :initial `{"x":-99,"y":-99,"lat":"--","lon":"--","alt":"--","vel":"--"}`
+  `scripts/iss.sh`)
+
+;; ---------- Clock (top center) ----------
+
+(defwindow clock
+  :monitor 0
+  :stacking "bg"
+  :exclusive false
+  :focusable false
+  :geometry (geometry :x "0px" :y "8%" :anchor "top center" :width "800px")
+  (box :orientation "v" :space-evenly false :class "clock-box" :halign "center"
+    (box :orientation "h" :halign "center" :space-evenly false
+      (label :class "clock-h" :limit-width 6 :show-truncated false :text hours)
+      (label :class "clock-m" :limit-width 6 :show-truncated false :text minutes))
+    (label :class "clock-date" :limit-width 40 :show-truncated false :text datestr)))
+
+;; ---------- Weather (top right) ----------
+
+(defwindow weather
+  :monitor 0
+  :stacking "bg"
+  :exclusive false
+  :focusable false
+  :geometry (geometry :x "30px" :y "30px" :anchor "top right" :width "560px")
+  (box :orientation "v" :space-evenly false :class "weather-box" :halign "end"
+    ;; Current conditions
+    (box :orientation "h" :halign "end" :space-evenly false :spacing 14
+      (label :class "weather-icon-now" :text {weather.icon})
+      (box :orientation "v" :space-evenly false
+        (label :class "weather-temp" :text "${weather.temp}°")
+        (label :class "weather-hum"  :text "${weather.hum}%")))
+    ;; 5-day forecast
+    (box :orientation "h" :halign "end" :space-evenly false
+         :spacing 20 :class "forecast"
+      (for d in {weather.days}
+        (box :orientation "v" :space-evenly false :class "forecast-day"
+          (label :class "fc-name" :limit-width 8 :show-truncated false :text {d.name})
+          (label :class "fc-date" :limit-width 8 :show-truncated false :text {d.date})
+          (label :class "fc-icon" :text {d.icon})
+          (label :class "fc-max"  :text "${d.max}°")
+          (label :class "fc-min"  :text "${d.min}°"))))))
+
+;; ---------- Calendar (right side) ----------
+
+(defwindow calendar
+  :monitor 0
+  :stacking "bg"
+  :exclusive false
+  :focusable false
+  :geometry (geometry :x "40px" :y "0px" :anchor "center right")
+  (box :orientation "v" :space-evenly false :class "cal-box"
+    (label :class "cal-month" :halign "end" :text {cal.month})
+    ;; Week starts on Monday. For a Sunday start, reorder these to
+    ;; "Sun Mon Tue Wed Thu Fri Sat" and edit calendar.sh (see comment there).
+    (box :orientation "h" :space-evenly true :class "cal-header"
+      (label :class "cal-dow" :text "Mon")
+      (label :class "cal-dow" :text "Tue")
+      (label :class "cal-dow" :text "Wed")
+      (label :class "cal-dow" :text "Thu")
+      (label :class "cal-dow" :text "Fri")
+      (label :class "cal-dow" :text "Sat")
+      (label :class "cal-dow" :text "Sun"))
+    (box :orientation "v" :space-evenly false
+      (for week in {cal.weeks}
+        (box :orientation "h" :space-evenly true
+          (for day in week
+            (label :class "cal-day ${day.t ? 'cal-today' : ''}"
+                   :text {day.d})))))))
+
+;; ---------- System stats (bottom right) ----------
+
+(defwidget statline [name value]
+  (box :orientation "v" :space-evenly false :class "statline"
+    (box :orientation "h" :space-evenly false
+      (label :class "stat-name" :halign "start" :hexpand true :text name)
+      (label :class "stat-val"  :halign "end" :text value))
+    (box :class "stat-sep")))
+
+(defwindow stats
+  :monitor 0
+  :stacking "bg"
+  :exclusive false
+  :focusable false
+  :geometry (geometry :x "40px" :y "60px" :anchor "bottom right" :width "260px")
+  (box :orientation "v" :space-evenly false :class "stats-box"
+    (statline :name "CPU"    :value "${round(EWW_CPU.avg, 0)}%")
+    (statline :name "Memory" :value "${round(EWW_RAM.used_mem_perc, 0)}%")
+    (statline :name "GPU"    :value "${gpu}%")
+    (box :orientation "h" :space-evenly false :class "netline"
+      (label :class "stat-name" :halign "start" :hexpand true
+             :text " ${net.down} KB/s")
+      (label :class "stat-name" :halign "end"
+             :text " ${net.up} KB/s"))))
+
+;; ---------- ISS tracker (world map, centered) ----------
+
+(defwindow iss
+  :monitor 0
+  :stacking "bg"
+  :exclusive false
+  :focusable false
+  :geometry (geometry :x "0px" :y "-4%" :anchor "center" :width "700px" :height "390px")
+  (box :orientation "v" :space-evenly false :class "iss-box" :halign "center"
+    (overlay
+      ;; Base: the static world map
+      (image :path "assets/world.svg" :image-width 700 :image-height 350)
+      ;; Top: ISS marker positioned via margin (-6px offset to center the dot)
+      (box :halign "start" :valign "start"
+           :style "margin-left: ${iss.x - 6}px; margin-top: ${iss.y - 6}px;"
+        (label :class "iss-dot" :text "●")))
+    ;; Readout below the map (this is the satellite's own position, not yours)
+    (box :orientation "h" :halign "center" :space-evenly false
+         :spacing 22 :class "iss-readout"
+      (label :class "iss-label" :text "ISS")
+      (label :text "${iss.lat}°, ${iss.lon}°")
+      (label :text "${iss.alt} km")
+      (label :text "${iss.vel} km/h"))))

@@ -1,0 +1,125 @@
+// ============================================================
+//  Sonder look: thin, light sans-serif with a green accent.
+//  Change $font to one you have installed. Thin weights sell
+//  the aesthetic. "Symbols Nerd Font" at the end of the chain
+//  lets the weather glyphs (PUA codepoints) fall back to it.
+// ============================================================
+
+$font:   "Lato", "Montserrat", "Comfortaa", "Cantarell", "Symbols Nerd Font", sans-serif;
+$fg:     rgba(235, 235, 235, 0.92);
+$dim:    rgba(235, 235, 235, 0.65);
+$accent: #8fbc8f;   // muted green, like the minute digits in Sonder
+$shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+
+* {
+  all: unset;
+  font-family: $font;
+  color: $fg;
+  text-shadow: $shadow;
+}
+
+// ---------- Clock ----------
+
+.clock-h {
+  font-size: 130px;
+  font-weight: 200;
+  color: $fg;
+}
+
+.clock-m {
+  font-size: 130px;
+  font-weight: 200;
+  color: $accent;
+}
+
+.clock-date {
+  font-size: 26px;
+  font-weight: 300;
+  color: $dim;
+  margin-top: 6px;
+}
+
+// ---------- Weather ----------
+
+.weather-icon-now { font-family: "Symbols Nerd Font"; font-size: 44px; color: $fg; }
+.weather-temp     { font-size: 34px; font-weight: 200; }
+.weather-hum      { font-size: 15px; color: $dim; }
+
+.forecast { margin-top: 18px; }
+
+.forecast-day label { font-weight: 300; }
+.fc-name { font-size: 15px; }
+.fc-date { font-size: 12px; color: $dim; margin-bottom: 6px; }
+.fc-icon { font-family: "Symbols Nerd Font"; font-size: 22px; margin-bottom: 6px; }
+.fc-max  { font-size: 15px; }
+.fc-min  { font-size: 13px; color: $dim; }
+
+// ---------- Calendar ----------
+
+.cal-month {
+  font-size: 34px;
+  font-weight: 200;
+  font-style: italic;
+  color: $accent;
+  margin-bottom: 10px;
+}
+
+.cal-dow {
+  font-size: 13px;
+  color: $dim;
+  min-width: 34px;
+  margin-bottom: 4px;
+}
+
+.cal-day {
+  font-size: 14px;
+  font-weight: 300;
+  min-width: 34px;
+  min-height: 30px;
+}
+
+.cal-today {
+  color: $accent;
+  font-weight: 600;
+  border: 1px solid $accent;
+  border-radius: 999px;
+}
+
+// ---------- Stats ----------
+
+.stats-box { font-weight: 300; }
+
+.statline { margin-bottom: 8px; }
+
+.stat-name { font-size: 14px; color: $dim; }
+.stat-val  { font-size: 14px; }
+
+.stat-sep {
+  min-height: 1px;
+  background-color: rgba(235, 235, 235, 0.35);
+  margin-top: 3px;
+}
+
+.netline { margin-top: 4px; }
+
+// ---------- ISS tracker ----------
+
+.iss-dot {
+  color: $accent;
+  font-size: 13px;
+  // glow around the marker
+  text-shadow: 0 0 4px $accent, 0 0 8px $accent;
+}
+
+.iss-readout {
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 300;
+  color: $dim;
+}
+
+.iss-label {
+  color: $accent;
+  font-weight: 400;
+  padding-right: 4px;
+}
