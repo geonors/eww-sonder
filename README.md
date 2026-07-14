@@ -28,7 +28,7 @@ paru -S eww jq curl librsvg ttf-lato ttf-nerd-fonts-symbols
 ## Install
 
 ```bash
-git clone https://github.com/YOURNAME/eww-sonder.git
+git clone https://github.com/geonors/eww-sonder.git
 mkdir -p ~/.config/eww
 cp -r eww-sonder/* ~/.config/eww/
 chmod +x ~/.config/eww/scripts/*.sh
