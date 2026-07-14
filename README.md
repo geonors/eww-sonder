@@ -98,3 +98,7 @@ eww open-many clock weather calendar stats iss
 - Weather from [Open-Meteo](https://open-meteo.com/).
 - ISS position from [wheretheiss.at](https://wheretheiss.at/).
 - Coastlines from [Natural Earth](https://www.naturalearthdata.com/).
+
+## License
+
+MIT — see [LICENSE](LICENSE).
